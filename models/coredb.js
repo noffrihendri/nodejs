@@ -7,9 +7,12 @@ class dbModel {
     }
     
     async getData(arrConfigTable = [], arrOrder = [], arrwhere = [], limit=0, offset=0){
+      //  console.log(arrwhere)
             try{    
 
                 let arrWheres =   await this._getWhere(arrwhere); 
+
+               // console.log(arrWheres)
                 let arrOrders =   await this._getOrder(arrOrder);
                 let field     =   (typeof(this.selectx)=='undefined' || this.selectx==""  )?" * ":this.selectx;
                 let strLimit  = ""; 
@@ -17,10 +20,14 @@ class dbModel {
                 if(offset>0){ strLimit = strLimit + " Offset "+offset; }
                 let join = this.joinx; 
                 this._clearParam(); 
-                console.log('select '+field+' from '+arrConfigTable.tablename +" "+join+' '+arrWheres.text+' '+arrOrders.text+strLimit)
-                console.log(arrWheres.param)
-                let data =   await pool.query('select '+field+' from '+arrConfigTable.tablename +" "+join+' '+arrWheres.text+' '+arrOrders.text+strLimit, arrWheres.param) 
-                return data.rows;
+                // console.log('select '+field+' from '+arrConfigTable.tablename +" "+join+' '+arrWheres.text+' '+arrOrders.text+strLimit)
+                return new Promise(function(resolve, reject) {
+
+                    let query = 'select '+field+' from '+arrConfigTable.tablename +" "+join+' '+arrWheres.text+' '+arrOrders.text+strLimit;
+                    let data =  pool.querybuilder(query)
+                    resolve(data);
+                });
+
 
             }catch(error){
 
@@ -251,13 +258,14 @@ class dbModel {
     }
 
     _getWhere(arrWhere = [],intPramstr = 1){
-        
+      // console.log('disni',arrWhere)
         return new Promise((resolve)=>{
             let res = {text:"", param:[]}
             if( Sugar.Object.size(arrWhere) > 0 ){
                 let strWhere = ""; 
                 let key = Sugar.Object.keys(arrWhere)
                 let arrValue =  Sugar.Object.values(arrWhere)
+                // console.log('sini',arrValue)
                 let WheVal = [];
                 
                 for (let index = 0; index < arrValue.length; index++) {
@@ -269,10 +277,15 @@ class dbModel {
                             strWhere = strWhere+' And '
                         }
                     }
+                   // console.log('disini',key[index]);
+                     //console.log('index',intPramstr);
+                    // console.log(key[index].includes('_sql'))
                     if(key[index].includes('_sql')){
                         strWhere = strWhere+" "+arrValue[index];
                     }else{
-                        strWhere = strWhere+" "+key[index]+"=$"+(index+intPramstr)+" ";
+                      //  strWhere = strWhere+" "+key[index]+"=$"+(index+intPramstr)+" ";
+                      strWhere = strWhere+" "+key[index]+"='"+arrValue[index]+"' ";
+                        // /console.log('str',arrValue[index])
                         WheVal.push(arrValue[index]);
                     }
                     

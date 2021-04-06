@@ -19,6 +19,8 @@ const Museradmin = {
         return data.deleteData(dbconfig,arrWhere);
     },
     getUserAdminLogin(arrOrder=[],arrWhere=[], limit = 0,  offset = 0){
+
+        //console.log(arrWhere);
         return data.getData(dbconfig,arrOrder,arrWhere,limit,offset); 
     }
 }
