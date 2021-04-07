@@ -8,6 +8,7 @@ const hbs = require('hbs');
 const bodyParser = require('body-parser');
 
 const app = express();
+const serverport = 3000;
 
 
  
@@ -25,8 +26,9 @@ let indexrouter = require('./routes/routes');
 
 app.use('/', indexrouter);
  
-
+require ('custom-env').env('staging')
 //server listening
-app.listen(8000, () => {
-  console.log('Server is running at port 8000');
+app.listen(serverport, () => {
+    console.log('database',process.env.DB_NAME);
+  console.log('Server is running at port',serverport);
 });

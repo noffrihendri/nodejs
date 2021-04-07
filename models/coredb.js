@@ -1,5 +1,6 @@
 const pool = require('../config/database');
 const Sugar =  require('sugar');
+const env = process.env;
 
 class dbModel {
     constructor(){
@@ -21,12 +22,19 @@ class dbModel {
                 let join = this.joinx; 
                 this._clearParam(); 
                 // console.log('select '+field+' from '+arrConfigTable.tablename +" "+join+' '+arrWheres.text+' '+arrOrders.text+strLimit)
-                return new Promise(function(resolve, reject) {
+                // return new Promise(function(resolve, reject) {
 
-                    let query = 'select '+field+' from '+arrConfigTable.tablename +" "+join+' '+arrWheres.text+' '+arrOrders.text+strLimit;
-                    let data =  pool.querybuilder(query)
-                    resolve(data);
-                });
+                    // let query = 'select '+field+' from '+arrConfigTable.tablename +" "+join+' '+arrWheres.text+' '+arrOrders.text+strLimit;
+                    // let data =  pool.querybuilder(query)
+                //     resolve(data);
+                // });
+                let query = 'select '+field+' from '+arrConfigTable.tablename +" "+join+' '+arrWheres.text+' '+arrOrders.text+strLimit;
+                console.log(query);
+                return await  pool.querybuilder(query)
+
+                
+
+                //console.log('disniwoi',data)
 
 
             }catch(error){
@@ -40,7 +48,7 @@ class dbModel {
         try{
             let arrWheres =   await this._getWhere(arrwhere); 
             let join = this.joinx; 
-            let data =   await pool.query('select count(*) as number  from '+arrConfigTable.tablename +' '+join+' '+arrWheres.text, arrWheres.param)
+            let data =   await pool.querybuilder('select count(*) as number  from '+arrConfigTable.tablename +' '+join+' '+arrWheres.text, arrWheres.param)
             this._clearParam();
             return new Promise((resolve)=> resolve(parseInt(data.rows[0].number)));
         }catch(error){
@@ -50,7 +58,10 @@ class dbModel {
 
     async addData(arrConfigTable = [], arrData = []){
         try{
-            let datafield = await this._getfield('public',arrConfigTable.tablename);
+           // let datafield = await this._getfield('public',arrConfigTable.tablename); postgresql
+
+
+            let datafield = await this._getfield(env.DB_NAME,arrConfigTable.tablename);
             let fieldName = Sugar.Object.values(Sugar.Object.map(datafield,'column_name'));
             let arrSavingDb = {}; 
             let arrKey = Sugar.Object.keys(arrData);
@@ -99,21 +110,23 @@ class dbModel {
                 if((index+1)==Sugar.Object.size(arrData)){
                     if(Sugar.Object.size(arrSavingDb)>0){
 
-                        if(fieldName.includes('createdate')) arrSavingDb['createdate'] 	= Sugar.Date.format(new Date(), '{yyyy}-{MM}-{dd} {HH}:{mm}:{ss}'); 
-                        if(fieldName.includes('updatedate')) arrSavingDb['updatedate'] 	= Sugar.Date.format(new Date(), '{yyyy}-{MM}-{dd} {HH}:{mm}:{ss}'); 
+                        if(fieldName.includes('created_at')) arrSavingDb['created_at'] 	= Sugar.Date.format(new Date(), '{yyyy}-{MM}-{dd} {HH}:{mm}:{ss}'); 
+                        if(fieldName.includes('updated_at')) arrSavingDb['updated_at'] 	= Sugar.Date.format(new Date(), '{yyyy}-{MM}-{dd} {HH}:{mm}:{ss}'); 
                 
                         let key = Sugar.Object.keys(arrSavingDb);
                         let val = Sugar.Object.values(arrSavingDb); 
 
                         let  arrstrBid =  Sugar.Array.map(val, (n,key) =>{
-                            return "$"+(key+1);
+                            //return "$"+(key+1);
+                            return "'"+n+"'"
                         });
                         let strBid = arrstrBid.join(',');
                         console.log('insert INTO '+arrConfigTable.tablename+' ('+key.join(',')+') VALUES('+strBid+')');
-                        console.log(val);
-                        let dt =  await pool.query('insert INTO '+arrConfigTable.tablename+' ('+key.join(',')+') VALUES('+strBid+')',val);
+                        //console.log(val);
+                        let dt =  await pool.querybuilder('insert INTO '+arrConfigTable.tablename+' ('+key.join(',')+') VALUES('+strBid+')',val);
+                       // console.log(dt)
                         this._clearParam();
-                        return new Promise((resolve)=>resolve(dt.rowCount),(error)=>{
+                        return new Promise((resolve)=>resolve(dt.affectedRows),(error)=>{
                             console.log(error)
                             resolve(0);
                         }); 
@@ -128,7 +141,7 @@ class dbModel {
    
     async editData(arrConfigTable = [], arrData = [], arrWhere = []){
         try{
-            let datafield = await this._getfield('public',arrConfigTable.tablename);
+            let datafield = await this._getfield(env.DB_NAME,arrConfigTable.tablename);
             let fieldName = Sugar.Object.values(Sugar.Object.map(datafield,'column_name'));
             let arrSavingDb = {}; 
             let arrKey = Sugar.Object.keys(arrData);
@@ -162,25 +175,26 @@ class dbModel {
 
                     if(Sugar.Object.size(arrSavingDb)>0){
 
-                        if(fieldName.includes('updatedate')) arrSavingDb['updatedate'] 	= Sugar.Date.format(new Date(), '{yyyy}-{MM}-{dd} {HH}:{mm}:{ss}'); 
+                        if(fieldName.includes('updated_at')) arrSavingDb['updated_at'] 	= Sugar.Date.format(new Date(), '{yyyy}-{MM}-{dd} {HH}:{mm}:{ss}'); 
                 
                         let key = Sugar.Object.keys(arrSavingDb);
                         let val = Sugar.Object.values(arrSavingDb); 
 
                         let  arrstrBid =  Sugar.Array.map(key, (n,key) =>{
-                            return n+"=$"+(key+1);
+                           // return n+"=$"+(key+1);
+                             return n+"='"+val[key]+"'";
                         });
                         let strBid = arrstrBid.join(',');
 
-                        let strWhere =await  this._getWhere(arrWhere,(val.length+1));
+                        let strWhere = await this._getWhere(arrWhere,(val.length+1));
                         let param = Sugar.Array.append(val,strWhere.param);
 
                         console.log('UPDATE  '+arrConfigTable.tablename+' SET '+strBid+' '+strWhere.text);
-                        console.log(param);
+                        console.log(val);
 
-                        let dt = await pool.query('UPDATE  '+arrConfigTable.tablename+' SET '+strBid+' '+strWhere.text,param);
+                        let dt = await pool.querybuilder('UPDATE  '+arrConfigTable.tablename+' SET '+strBid+' '+strWhere.text,param);
                         this._clearParam();
-                        return new Promise((resolve)=>resolve(dt.rowCount),(error)=>{ console.log(error);  resolve(0)  }); 
+                        return new Promise((resolve)=>resolve(dt.affectedRows),(error)=>{ console.log(error);  resolve(0)  }); 
                     }
                 }
             }
@@ -192,9 +206,9 @@ class dbModel {
     async deleteData(arrConfigTable = [], arrWhere = []){
         try{
             let arrWheres =   await this._getWhere(arrWhere); 
-            let data =   await pool.query('delete  from '+arrConfigTable.tablename +' '+arrWheres.text, arrWheres.param)
+            let data =   await pool.querybuilder('delete  from '+arrConfigTable.tablename +' '+arrWheres.text, arrWheres.param)
             this._clearParam();
-            return new Promise((resolve)=> resolve(data.rowCount));
+            return new Promise((resolve)=> resolve(data.affectedRows));
         }catch(error){
             return 0;
         }
@@ -332,15 +346,21 @@ class dbModel {
         
     }
     
-    async _getfield(schema="public", tableName=""){
+    async _getfield(schema="", tableName=""){
+
+        console.log('database',process.env.DB_NAME);
         if(tableName.includes('.')){
             let arrTbl =  tableName.split('.')
             schema = arrTbl[0];
             tableName = arrTbl[1];
         }
-        let sql = "SELECT column_name,data_type,column_default,is_nullable,udt_name  FROM information_schema.columns WHERE table_schema = '"+schema +"' AND table_name = '"+tableName+"'";
-        let data = await pool.query(sql); 
-        return data.rows; 
+        let sql = "SELECT column_name,data_type,column_default,is_nullable FROM information_schema.columns WHERE table_schema = '"+schema +"' AND table_name = '"+tableName+"'";
+
+     //   console.log(sql);
+        let data = await pool.querybuilder(sql); 
+
+        //console.log('hasil',data);
+        return data; 
     }
     
 

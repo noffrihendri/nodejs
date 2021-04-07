@@ -11,12 +11,17 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.19.0",
+    "custom-env": "^2.0.1",
     "express": "^4.17.1",
     "hbs": "^4.1.1",
+    "if-env": "^1.0.4",
     "jsonwebtoken": "^8.5.1",
     "md5": "^2.3.0",
     "mysql": "^2.18.1",
-    "sugar": "^2.0.6"
+    "mysql2": "^2.2.5",
+    "sequelize": "^6.6.2",
+    "sugar": "^2.0.6",
+    "v5": "^0.1.2"
   },
   "devDependencies": {}
 }

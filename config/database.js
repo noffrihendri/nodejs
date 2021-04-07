@@ -1,64 +1,33 @@
 //use mysql database
 const mysql = require('mysql');
+const env = process.env;
 
-
-
+const port = env.DB_PORT || '3307';
 //konfigurasi koneksi
 const dbConn = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  port: '3307',
-  database: 'nodejs'
+  host:  env.DB_HOST || 'localhost',
+  user:  env.DB_USER ||'root',
+  password:  env.DB_PASSWORD || '',
+  port: port,
+  database:  env.DB_NAME ||'nodejs'
 });
-
-
-
 
 dbConn.connect(function(error){
 	if(!!error) {
 		console.log(error);
 	} else {
-		console.log('Connected..!');
+		console.log('Connected..!',port);
 	}
 });
 
-// async function querybuilder(sql) {
-
-//   const results = await dbConn.execute(sql);
-//   console.log('result',results);
-//   //return results;
-// }
-
-
-// dbConn.querybuilder = function (query, result) {
-//         dbConn.query(query, function (err, res) {             
-//                 if(err) {
-//                     console.log("error: ", err);
-//                      return res;
-//                 }
-//                 else{
-// 					console.log(res);
-//                     return res;
-// 					// result.send(res)
-//                 }
-//             });   
-// };
-
-
-// dbConn.querybuilder = async function(req, res) {
-
-// 	let result ="";
-//     let data = dbConn.query(req);
-// 	console.log('ini',data.rows())
-// 	return result
-// };
 
 
 dbConn.querybuilder = function(query){
   return new Promise(function(resolve, reject){
     dbConn.query(query, 
-        function(err, rows){                                                
+        function(err, rows){       
+            
+            //console.log('disinidatabase',rows)
             if(rows === undefined){
                 reject(new Error("Error rows is undefined"));
             }else{
