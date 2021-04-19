@@ -37,3 +37,9 @@ const checktoken = (req,res,next) => {
 module.exports = {
   checktoken
 }
+
+
+
+fungsi:() => {
+  
+}

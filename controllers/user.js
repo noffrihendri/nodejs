@@ -48,9 +48,9 @@ module.exports = {
        
         let user = await helper.getuser(req);
         let body = req.body
+        //console.log(body !== {});
 
-
-        if(body > 0){
+        if(body !== {}){
 
             let arrdata = {
                 name:(body.name !== undefined) ? body.name :'',

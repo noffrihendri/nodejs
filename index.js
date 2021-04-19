@@ -6,9 +6,10 @@ const express = require('express');
 const hbs = require('hbs');
 //use bodyParser middleware
 const bodyParser = require('body-parser');
+const cors = require('cors');
 
 const app = express();
-const serverport = 3000;
+const serverport = 5000;
 
 
  
@@ -17,6 +18,7 @@ app.set('views',path.join(__dirname,'views'));
 //set view engine
 app.set('view engine', 'hbs');
 app.use(bodyParser.json());
+app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 //set folder public sebagai static folder untuk static file
 app.use('/assets',express.static(__dirname + '/public'));
