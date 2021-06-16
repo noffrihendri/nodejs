@@ -8,8 +8,11 @@ const hbs = require('hbs');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
+const cron = require('node-cron');
+
 const app = express();
 const serverport = 5000;
+
 
 
  
@@ -33,4 +36,10 @@ require ('custom-env').env('staging')
 app.listen(serverport, () => {
     console.log('database',process.env.DB_NAME);
   console.log('Server is running at port',serverport);
+});
+
+
+
+cron.schedule('*/1 * * * *', () => {
+  console.log('running a task every minute');
 });

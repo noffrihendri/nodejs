@@ -36,7 +36,8 @@ module.exports = {
                            name : data[0].name
                          };
             const jwtBearerToken = jwt.sign(user, config.secretkey, {
-                expiresIn: '3d',
+                expiresIn: '3d', //
+                //expiresIn: "120s", // it will be expired after 120s
                 subject: data[0].id.toString()
             });
 
