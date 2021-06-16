@@ -217,7 +217,7 @@ class dbModel {
     async query(sql=""){
         try{    
             this._clearParam(); 
-            let data =   await pool.query(sql) 
+            let data =   await pool.querybuilder(sql) 
             return data.rows;
         }catch(error){
             return []; 
@@ -228,7 +228,7 @@ class dbModel {
     async begintrans(){
         try{    
             this._clearParam(); 
-            let data =   await pool.query('BEGIN') 
+            let data =   await pool.querybuilder('BEGIN') 
             return data;
         }catch(error){
             return []; 
@@ -237,7 +237,7 @@ class dbModel {
     async comittrans(){
         try{    
             this._clearParam(); 
-            let data =   await pool.query('COMMIT')
+            let data =   await pool.querybuilder('COMMIT')
             console.log(data)
             return data;
         }catch(error){
@@ -247,7 +247,7 @@ class dbModel {
     async rollback(){
         try{    
             this._clearParam(); 
-            let data =   await pool.query('ROLLBACK')
+            let data =   await pool.querybuilder('ROLLBACK')
             return data;
         }catch(error){
             return []; 
